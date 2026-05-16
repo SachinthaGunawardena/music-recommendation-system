@@ -21,3 +21,6 @@ venv/
 # Model files
 *.pkl
 *.joblib
+
+# Database
+*.db
