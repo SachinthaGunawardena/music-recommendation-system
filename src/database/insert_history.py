@@ -1,7 +1,13 @@
 from sqlalchemy import create_engine, text
 import random
 
-DATABASE_URL = "postgresql://postgres:abc123@localhost:5432/music_recommendation_db"
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 engine = create_engine(DATABASE_URL)
 
