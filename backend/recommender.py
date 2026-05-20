@@ -46,3 +46,22 @@ def get_recommendations(song_title, top_n=10):
     ]
 
     return recommendations.to_dict(orient="records")
+
+def recommend_songs_by_genre(genre, top_n=5):
+
+    # Filter songs by genre
+    filtered_songs = data[
+        data["genre"].str.lower() == genre.lower()
+    ]
+
+    # Check if empty
+    if filtered_songs.empty:
+        return []
+
+    # Select columns
+    recommendations = filtered_songs[
+        ["track_name", "artist_name", "genre"]
+    ].head(top_n)
+
+    # Convert to dictionary
+    return recommendations.to_dict(orient="records")
