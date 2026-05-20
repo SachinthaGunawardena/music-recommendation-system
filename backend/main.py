@@ -1,40 +1,43 @@
 from fastapi import FastAPI
-from backend.recommender import get_recommendations
+from fastapi.middleware.cors import CORSMiddleware
+import pandas as pd
 
 app = FastAPI()
 
+# ENABLE CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# LOAD DATASET
+data = pd.read_csv("./data/enhanced_music.csv")
+
+# HOME
 @app.get("/")
 def home():
-    return {"message": "Music Recommendation API is running"}
+    return {"message": "Music Recommendation API"}
 
-
-from typing import List
-from backend.schemas import SongResponse
-
-
-from fastapi import HTTPException
-
-
-@app.get(
-    "/recommend/{song_name}",
-    response_model=List[SongResponse]
-)
+# RECOMMEND API
+@app.get("/recommend/{song_name}")
 def recommend(song_name: str):
 
-    recommendations = get_recommendations(song_name)
+    recommendations = data[
+        data["track_name"].str.contains(song_name, case=False, na=False)
+    ].head(10)
 
-    return recommendations
+    results = []
 
+    for _, row in recommendations.iterrows():
+        results.append({
+            "track_name": str(row["track_name"]),
+            "artist_name": str(row["artist_name"]),
+            "genre": str(row["genre"])
+        })
 
-from backend.recommender import data
-
-
-@app.get("/search/{query}")
-def search_song(query: str):
-
-    results = data[
-        data["track_name"].str.contains(query, case=False)
-    ][["track_name", "artist_name", "genre"]].head(10)
-
-    return results.to_dict(orient="records")
+    return {
+        "recommendations": results
+    }
