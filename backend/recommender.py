@@ -65,3 +65,29 @@ def recommend_songs_by_genre(genre, top_n=5):
 
     # Convert to dictionary
     return recommendations.to_dict(orient="records")
+
+def recommend_songs_by_genre(genre):
+
+    filtered = data[
+        data["genre"].str.contains(
+            genre,
+            case=False,
+            na=False
+        )
+    ].head(10)
+
+    results = []
+
+    for _, row in filtered.iterrows():
+
+        results.append({
+
+            "track_name": str(row["track_name"]),
+
+            "artist_name": str(row["artist_name"]),
+
+            "genre": str(row["genre"])
+
+        })
+
+    return results

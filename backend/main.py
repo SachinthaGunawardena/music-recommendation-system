@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+from mood_detection.emotion_detector import detect_emotion
+from backend.recommender import recommend_songs_by_genre
+from mood_detection.mood_music_mapper import mood_to_genre
+
 
 app = FastAPI()
 
@@ -15,6 +19,8 @@ app.add_middleware(
 
 # LOAD DATASET
 data = pd.read_csv("./data/enhanced_music.csv")
+
+print(data["genre"].unique())
 
 # HOME
 @app.get("/")
@@ -41,3 +47,46 @@ def recommend(song_name: str):
     return {
         "recommendations": results
     }
+
+@app.get("/detect_mood")
+def detect_mood():
+
+    mood = detect_emotion()
+
+    return {
+        "mood": mood
+    }
+
+from mood_detection.mood_music_mapper import mood_to_genre
+
+@app.get("/mood_recommendations")
+def mood_recommendations():
+
+    mood = detect_emotion()
+
+    genre = mood_to_genre.get(mood, "pop")
+
+    recommendations = data[
+        data["genre"].str.contains(
+            genre,
+            case=False,
+            na=False
+        )
+    ].head(10)
+
+    results = []
+
+    for _, row in recommendations.iterrows():
+
+        results.append({
+            "track_name": str(row["track_name"]),
+            "artist_name": str(row["artist_name"]),
+            "genre": str(row["genre"])
+        })
+
+    return {
+        "mood": mood,
+        "genre": genre,
+        "recommendations": results
+    }
+

@@ -1,8 +1,17 @@
 mood_to_genre = {
+
     "happy": "pop",
-    "sad": "acoustic",
-    "angry": "calm",
-    "neutral": "lofi",
-    "fear": "relax",
-    "surprise": "dance"
+
+    "sad": "blues",
+
+    "angry": "rock",
+
+    "fear": "jazz",
+
+    "surprise": "hip hop",
+
+    "neutral": "country",
+
+    "disgust": "reggae"
+
 }
