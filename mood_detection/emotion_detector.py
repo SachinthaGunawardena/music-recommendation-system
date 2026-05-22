@@ -1,37 +1,57 @@
+
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import cv2
 from fer import FER
+from collections import Counter
+
 
 # Initialize FER detector
-detector = FER(mtcnn=False)
+detector = FER(mtcnn=True)
 
 def detect_emotion():
 
-    # Open webcam
     cap = cv2.VideoCapture(0)
 
-    # Capture one frame
-    ret, frame = cap.read()
+    detected_emotions = []
 
-    # Release webcam
+    # Read multiple frames
+    for _ in range(15):
+
+        ret, frame = cap.read()
+
+        if not ret:
+            continue
+
+        # Detect emotions
+        emotions = detector.detect_emotions(frame)
+
+        if emotions:
+
+            emotion_scores = emotions[0]["emotions"]
+
+            # Best emotion
+            detected_emotion = max(
+                emotion_scores,
+                key=emotion_scores.get
+            )
+
+            confidence = emotion_scores[detected_emotion]
+
+            # Ignore weak predictions
+            if confidence > 0.40:
+
+                detected_emotions.append(detected_emotion)
+
     cap.release()
 
-    # If failed
-    if not ret:
+    # If nothing detected
+    if not detected_emotions:
         return "neutral"
 
-    # Detect emotions
-    emotions = detector.detect_emotions(frame)
+    # Most common emotion
+    final_emotion = Counter(
+        detected_emotions
+    ).most_common(1)[0][0]
 
-    # If face found
-    if emotions:
-
-        emotion_scores = emotions[0]["emotions"]
-
-        detected_emotion = max(
-            emotion_scores,
-            key=emotion_scores.get
-        )
-
-        return detected_emotion
-
-    return "neutral"
+    return final_emotion

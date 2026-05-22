@@ -1,10 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-from mood_detection.emotion_detector import detect_emotion
 from backend.recommender import recommend_songs_by_genre
 from mood_detection.mood_music_mapper import mood_to_genre
-
+from mood_detection.emotion_detector import detect_emotion
 
 app = FastAPI()
 
@@ -59,10 +58,8 @@ def detect_mood():
 
 from mood_detection.mood_music_mapper import mood_to_genre
 
-@app.get("/mood_recommendations")
-def mood_recommendations():
-
-    mood = detect_emotion()
+@app.get("/recommend-by-mood/{mood}")
+def recommend_by_mood(mood: str):
 
     genre = mood_to_genre.get(mood, "pop")
 
@@ -90,3 +87,11 @@ def mood_recommendations():
         "recommendations": results
     }
 
+@app.get("/detect-mood")
+def detect_mood():
+
+    mood = detect_emotion()
+
+    return {
+        "mood": mood
+    }
